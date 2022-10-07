@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	core "github.com/matrix-io/matrix-protos-go/matrix_io/malos/v1"
+	log "github.com/sirupsen/logrus"
 )
 
 type GPIOSensor struct {
@@ -52,13 +53,13 @@ func (s *GPIOSensor) GetData() ([]int, []int) {
 	// Decode Protocol Buffer & Update everloop Struct LED Count
 	proto.Unmarshal([]byte(message), &gpio)
 	// Print Data
-	fmt.Println(gpio)
-	fmt.Printf("Pin: %d\nMode: %v\nValue: %d\nValues: %d\n", gpio.Pin, gpio.Mode, gpio.Value, gpio.Values)
+	log.Debug(gpio)
+	log.Debug("Pin: %d\nMode: %v\nValue: %d\nValues: %d\n", gpio.Pin, gpio.Mode, gpio.Value, gpio.Values)
 	messages <- "Data Update Port: CONNECTED"
 
 	// Start Base Port
 	// go basePort() // Send Configuration Message
-	listValues := Reverse(fmt.Sprintf("%028s", strconv.FormatInt(int64(gpio.Values), 2)))
+	listValues := Reverse(fmt.Sprintf("%016s", strconv.FormatInt(int64(gpio.Values), 2)))
 	// Close Data Update Port
 	on := make([]int, 0)
 	off := make([]int, 0)

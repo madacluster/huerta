@@ -5,6 +5,7 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/golang/protobuf/proto"
 	core "github.com/matrix-io/matrix-protos-go/matrix_io/malos/v1"
@@ -28,7 +29,7 @@ func (s *HumiditySensor) GetData() (float32, float32) {
 	// Decode Protocol Buffer & Update everloop Struct LED Count
 	proto.Unmarshal([]byte(message), &humidity)
 	// Print Data
-	fmt.Printf("Humidity: %f \t Temperature: %f\n", humidity.Humidity, humidity.Temperature)
+	log.Debug("Humidity: %f \t Temperature: %f\n", humidity.Humidity, humidity.Temperature)
 	messages <- "Data Update Port: CONNECTED"
 	// Start Base Port
 	// go basePort() // Send Configuration Message

@@ -47,9 +47,9 @@ func Pressure(w http.ResponseWriter, r *http.Request) {
 func Gpio(w http.ResponseWriter, r *http.Request) {
 	sensor := pkg.NewGPIOSensor(host)
 	// time.Sleep(1000 * time.Millisecond)
-	pin, mode, value, values := sensor.GetData()
+	on, off := sensor.GetData()
 
-	w.Write([]byte(fmt.Sprintf("Pin: %d\nMode: %v\nValue: %d\nValues: %d\n", pin, mode, value, values)))
+	w.Write([]byte(fmt.Sprintf("On: %v\nOff: %v\n", on, off)))
 }
 
 // POST ${host}/${path}/gpio/${pin}/configure
@@ -59,4 +59,8 @@ func webserver() {
 	http.HandleFunc("/pressure", Pressure)
 	http.HandleFunc("/uv", Uv)
 	http.ListenAndServe(":8080", nil)
+}
+
+func main() {
+	webserver()
 }

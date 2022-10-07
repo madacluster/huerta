@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/golang/protobuf/proto"
 	core "github.com/matrix-io/matrix-protos-go/matrix_io/malos/v1"
 	zmq "github.com/pebbe/zmq4"
@@ -74,7 +76,7 @@ func (s *Sensor) keepAlivePort(channel chan string) {
 			return
 		default:
 			pusher.Send("", 1)
-			fmt.Printf("Keep-Alive Sent for Sensor %s\n", s.name)
+			log.Debug("Keep-Alive Sent for Sensor %s\n", s.name)
 			time.Sleep(1000 * time.Millisecond)
 		}
 	}
@@ -94,7 +96,7 @@ func (s *Sensor) errorPort(channel chan string) {
 		// On Error
 		message, _ := subscriber.Recv(2)
 		// Print Error
-		fmt.Println("ERROR:", message)
+		log.Error("ERROR:", message)
 	}
 }
 
