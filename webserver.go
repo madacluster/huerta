@@ -41,7 +41,7 @@ func Pressure(w http.ResponseWriter, r *http.Request) {
 // GPIO
 // GET ${host}/${path}/gpio
 func Gpio(w http.ResponseWriter, r *http.Request) {
-	sensor := NewGpioSensor()
+	sensor := NewGPIOSensor()
 	// time.Sleep(1000 * time.Millisecond)
 	pin, value := sensor.getData()
 	w.Write([]byte(fmt.Sprintf("Pin: %d\nValue: %d", pin, value)))

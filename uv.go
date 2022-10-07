@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"time"
 
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/golang/protobuf/proto"
 	core "github.com/matrix-io/matrix-protos-go/matrix_io/malos/v1"
 )
@@ -34,4 +36,25 @@ func (s *UvSensor) getData() (float32, string) {
 	// Close Data Update Port
 	return uv.UvIndex, uv.OmsRisk
 
+}
+
+func (s *UvSensor) forwardIndex(temp float32, c mqtt.Client) {
+	token := c.Publish("home/salon/uv_index", 0, false, fmt.Sprintf("%f", temp))
+	token.Wait()
+}
+func (s *UvSensor) forwardRisk(temp string, c mqtt.Client) {
+	token := c.Publish("home/salon/risk", 0, false, temp)
+	token.Wait()
+	if err := token.Error(); err != nil {
+		fmt.Println(err)
+	}
+}
+
+func (s *UvSensor) forward(c mqtt.Client) {
+	for {
+		index, risk := s.getData()
+		s.forwardIndex(index, c)
+		s.forwardRisk(risk, c)
+		time.Sleep(300 * time.Second)
+	}
 }

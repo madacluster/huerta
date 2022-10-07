@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"time"
+
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 
 	"github.com/golang/protobuf/proto"
 	core "github.com/matrix-io/matrix-protos-go/matrix_io/malos/v1"
@@ -33,4 +36,26 @@ func (s *HumiditySensor) getData() (float32, float32) {
 	// Close Data Update Port
 	return humidity.Humidity, humidity.Temperature
 
+}
+
+func (s *HumiditySensor) forwardTemp(temp float32, c mqtt.Client) {
+	token := c.Publish("home/salon/temperature", 0, false, fmt.Sprintf("%f", temp))
+	fmt.Println(token.Wait())
+}
+func (s *HumiditySensor) forwardHumidity(temp float32, c mqtt.Client) {
+	token := c.Publish("home/salon/humidity", 0, false, fmt.Sprintf("%f", temp))
+
+	fmt.Println(token.Wait())
+	if err := token.Error(); err != nil {
+		fmt.Println(err)
+	}
+}
+
+func (s *HumiditySensor) forward(c mqtt.Client) {
+	for {
+		humidity, temperature := s.getData()
+		s.forwardTemp(temperature, c)
+		s.forwardHumidity(humidity, c)
+		time.Sleep(300 * time.Second)
+	}
 }

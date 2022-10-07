@@ -61,7 +61,6 @@ func (s *Sensor) basePort() {
 		pusher.Send(string((encodedConfiguration)), 1)
 
 		// Reset Everloop Array
-		everloop.Led = []*core.LedValue{}
 		// Loop delay
 		time.Sleep(50 * time.Millisecond)
 	}
@@ -96,7 +95,6 @@ func (s *Sensor) errorPort(channel chan string) {
 	subscriber.SetSubscribe("")                // Subscribe To Error Port Messages
 
 	// Notify That Port Is Ready
-	portStatus <- "Error Port: CONNECTED"
 
 	// Wait For Error
 	for {

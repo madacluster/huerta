@@ -2,14 +2,16 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"time"
 
-	core "github.com/matrix-io/matrix-protos-go/matrix_io/malos/v1"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 // Global Vars
-var portStatus = make(chan string, 4) // Channel To Ensure Port Goroutines Are Called
-var everloop = core.EverloopImage{}   // State Of All MATRIX LEDs
-var host = "tcp://192.168.0.110"
+var ZERO_HOST = "tcp://192.168.0.110"
+var MOSQUITTO_HOST = "mqtt://192.168.0.108:1883"
 
 func main() {
 	fmt.Println("Starting MATRIX CORE Everloop")
@@ -23,8 +25,35 @@ func main() {
 	// for portStatus := range portStatus {
 	// 	fmt.Println("received", portStatus)
 	// }
-	webserver()
+	ZERO_HOST = os.Getenv("ZERO_HOST")
+	MOSQUITTO_HOST = os.Getenv("MOSQUITTO_HOST")
+
+	forward()
 }
 func getHost(port string) string {
-	return fmt.Sprintf("%s:%s", host, port)
+	return fmt.Sprintf("%s:%s", ZERO_HOST, port)
+}
+
+var f mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
+	fmt.Printf("TOPIC: %s\n", msg.Topic())
+	fmt.Printf("MSG: %s\n", msg.Payload())
+}
+
+func forward() {
+	humidity := NewHumiditySensor()
+	uv := NewUvSensor()
+	// mqtt.DEBUG = log.New(os.Stdout, "", 0)
+	mqtt.ERROR = log.New(os.Stdout, "", 0)
+	opts := mqtt.NewClientOptions().AddBroker(MOSQUITTO_HOST).SetClientID("gotrivial")
+	opts.SetKeepAlive(2 * time.Second)
+	opts.SetDefaultPublishHandler(f)
+	opts.SetPingTimeout(1 * time.Second)
+
+	c := mqtt.NewClient(opts)
+	if token := c.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	}
+
+	go humidity.forward(c)
+	uv.forward(c)
 }
