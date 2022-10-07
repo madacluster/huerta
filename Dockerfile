@@ -6,6 +6,9 @@ COPY . .
 RUN go mod vendor
 RUN  GOOS=linux go build -ldflags="-w -s" -o matrix .
 FROM ubuntu
-RUN apt update && apt install libzmq3-dev -y
+RUN apt update && apt install libzmq3-dev -y && apt-get clean autoclean \
+    && apt-get autoremove --yes \
+    && rm -rf /var/lib/{apt,dpkg,cache,log}/
+
 COPY --from=build /src/matrix /opt/matrix
 ENTRYPOINT ["/opt/matrix"]

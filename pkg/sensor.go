@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"fmt"
@@ -20,9 +20,18 @@ type Ports struct {
 type Sensor struct {
 	ports Ports
 	name  string
+	host  string
 }
 
-func NewSensor(name, config, keep, error, update string) *Sensor {
+func (s *Sensor) getHost(port string) string {
+	return fmt.Sprintf("%s:%s", s.host, port)
+}
+
+func NewSensor(name, host string, port int) *Sensor {
+	config := fmt.Sprintf("%d", port)
+	keep := fmt.Sprintf("%d", port+1)
+	error := fmt.Sprintf("%d", port+2)
+	update := fmt.Sprintf("%d", port+3)
 	return &Sensor{
 		ports: Ports{
 			config,
@@ -31,46 +40,30 @@ func NewSensor(name, config, keep, error, update string) *Sensor {
 			update,
 		},
 		name: name,
+		host: host,
 	}
 }
 
 // BASE PORT \\ (port where configurations are sent)
-func (s *Sensor) basePort() {
+func (s *GPIOSensor) basePort(config core.DriverConfig) {
 	// Connect ZMQ Socket To MATRIX CORE
 	// zmq.PUSH
-	pusher, _ := zmq.NewSocket(zmq.PUSH)    // Create A Pusher Socket
-	pusher.Connect(getHost(s.ports.config)) // Connect Pusher To Base Port
+	pusher, _ := zmq.NewSocket(zmq.PUSH)      // Create A Pusher Socket
+	pusher.Connect(s.getHost(s.ports.config)) // Connect Pusher To Base Port
 
 	// Notify That Port Is Ready
 
-	// Keep Sending Everloop Image
-	for {
-		// Create (x) Amount Of Randomly Colored LEDs
-
-		// Create Everloop Driver Configuration Protocol
-		configuration := core.DriverConfig{
-			Humidity: &core.HumidityParams{
-				CurrentTemperature: 20.7,
-			},
-			DelayBetweenUpdates:  1,
-			TimeoutAfterLastPing: 6,
-		}
-		//Encode Protocol Buffer
-		var encodedConfiguration, _ = proto.Marshal(&configuration)
-		// Send Protocol Buffer
-		pusher.Send(string((encodedConfiguration)), 1)
-
-		// Reset Everloop Array
-		// Loop delay
-		time.Sleep(50 * time.Millisecond)
-	}
+	//Encode Protocol Buffer
+	var encodedConfiguration, _ = proto.Marshal(&config)
+	// Send Protocol Buffer
+	pusher.Send(string((encodedConfiguration)), 1)
 }
 
 // KEEP-ALIVE PORT \\ (port where pings are sent)
 func (s *Sensor) keepAlivePort(channel chan string) {
 	// Connect ZMQ Socket To MATRIX CORE
-	pusher, _ := zmq.NewSocket(zmq.PUSH)  // Create A Pusher Socket
-	pusher.Connect(getHost(s.ports.keep)) // Connect Pusher To Keep-Alive Port
+	pusher, _ := zmq.NewSocket(zmq.PUSH)    // Create A Pusher Socket
+	pusher.Connect(s.getHost(s.ports.keep)) // Connect Pusher To Keep-Alive Port
 
 	// Notify That Port Is Ready
 
@@ -90,9 +83,9 @@ func (s *Sensor) keepAlivePort(channel chan string) {
 // ERROR PORT \\ (port where errors are received)
 func (s *Sensor) errorPort(channel chan string) {
 	// Connect ZMQ Socket To MATRIX CORE
-	subscriber, _ := zmq.NewSocket(zmq.SUB)    // Create A Subscriber Socket
-	subscriber.Connect(getHost(s.ports.error)) // Connect Subscriber To Data Update Port
-	subscriber.SetSubscribe("")                // Subscribe To Error Port Messages
+	subscriber, _ := zmq.NewSocket(zmq.SUB)      // Create A Subscriber Socket
+	subscriber.Connect(s.getHost(s.ports.error)) // Connect Subscriber To Data Update Port
+	subscriber.SetSubscribe("")                  // Subscribe To Error Port Messages
 
 	// Notify That Port Is Ready
 
@@ -108,9 +101,9 @@ func (s *Sensor) errorPort(channel chan string) {
 func (s *Sensor) dataUpdatePort() (string, error) {
 	// Connect ZMQ Socket To MATRIX CORE
 
-	subscriber, _ := zmq.NewSocket(zmq.SUB)     // Create A Subscriber Socket
-	subscriber.Connect(getHost(s.ports.update)) // Connect Subscriber To Data Update Port
-	subscriber.SetSubscribe("")                 // Subscribe To Data Update Port Messages
+	subscriber, _ := zmq.NewSocket(zmq.SUB)       // Create A Subscriber Socket
+	subscriber.Connect(s.getHost(s.ports.update)) // Connect Subscriber To Data Update Port
+	subscriber.SetSubscribe("")                   // Subscribe To Data Update Port Messages
 
 	// Notify That Port Is Ready
 

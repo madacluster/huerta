@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"fmt"
@@ -14,13 +14,13 @@ type HumiditySensor struct {
 	*Sensor
 }
 
-func NewHumiditySensor() *HumiditySensor {
-	sensor := &HumiditySensor{NewSensor("Humidity", "20017", "20018", "20019", "20020")}
+func NewHumiditySensor(host string) *HumiditySensor {
+	sensor := &HumiditySensor{NewSensor("Humidity", host, 20017)}
 	return sensor
 }
 
 // DATA UPDATE PORT \\ (port where updates are received)
-func (s *HumiditySensor) getData() (float32, float32) {
+func (s *HumiditySensor) GetData() (float32, float32) {
 	var humidity = core.Humidity{}
 	messages := make(chan string)
 	go s.keepAlivePort(messages)
@@ -51,9 +51,9 @@ func (s *HumiditySensor) forwardHumidity(temp float32, c mqtt.Client) {
 	}
 }
 
-func (s *HumiditySensor) forward(c mqtt.Client) {
+func (s *HumiditySensor) Forward(c mqtt.Client) {
 	for {
-		humidity, temperature := s.getData()
+		humidity, temperature := s.GetData()
 		s.forwardTemp(temperature, c)
 		s.forwardHumidity(humidity, c)
 		time.Sleep(300 * time.Second)

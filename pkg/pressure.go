@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"fmt"
@@ -11,13 +11,13 @@ type PressureSensor struct {
 	*Sensor
 }
 
-func NewPressureSensor() *PressureSensor {
-	sensor := &PressureSensor{NewSensor("Pressure", "20025", "20026", "20027", "20028")}
+func NewPressureSensor(host string) *PressureSensor {
+	sensor := &PressureSensor{NewSensor("Pressure", host, 20025)}
 	return sensor
 }
 
 // DATA UPDATE PORT \\ (port where updates are received)
-func (s *PressureSensor) getData() (float32, float32, float32) {
+func (s *PressureSensor) GetData() (float32, float32, float32) {
 	var pressure = core.Pressure{}
 	messages := make(chan string)
 	go s.keepAlivePort(messages)

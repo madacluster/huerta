@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"fmt"
@@ -13,13 +13,13 @@ type UvSensor struct {
 	*Sensor
 }
 
-func NewUvSensor() *UvSensor {
-	sensor := &UvSensor{NewSensor("Pressure", "20029", "20030", "20031", "20032")}
+func NewUvSensor(host string) *UvSensor {
+	sensor := &UvSensor{NewSensor("UV", host, 20029)}
 	return sensor
 }
 
 // DATA UPDATE PORT \\ (port where updates are received)
-func (s *UvSensor) getData() (float32, string) {
+func (s *UvSensor) GetData() (float32, string) {
 	var uv = core.UV{}
 	messages := make(chan string)
 	go s.keepAlivePort(messages)
@@ -50,9 +50,9 @@ func (s *UvSensor) forwardRisk(temp string, c mqtt.Client) {
 	}
 }
 
-func (s *UvSensor) forward(c mqtt.Client) {
+func (s *UvSensor) Forward(c mqtt.Client) {
 	for {
-		index, risk := s.getData()
+		index, risk := s.GetData()
 		s.forwardIndex(index, c)
 		s.forwardRisk(risk, c)
 		time.Sleep(300 * time.Second)

@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
@@ -30,9 +28,6 @@ func main() {
 
 	forward()
 }
-func getHost(port string) string {
-	return fmt.Sprintf("%s:%s", ZERO_HOST, port)
-}
 
 var f mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	fmt.Printf("TOPIC: %s\n", msg.Topic())
@@ -40,20 +35,20 @@ var f mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 }
 
 func forward() {
-	humidity := NewHumiditySensor()
-	uv := NewUvSensor()
-	// mqtt.DEBUG = log.New(os.Stdout, "", 0)
-	mqtt.ERROR = log.New(os.Stdout, "", 0)
-	opts := mqtt.NewClientOptions().AddBroker(MOSQUITTO_HOST).SetClientID("gotrivial")
-	opts.SetKeepAlive(2 * time.Second)
-	opts.SetDefaultPublishHandler(f)
-	opts.SetPingTimeout(1 * time.Second)
+	// humidity := NewHumiditySensor()
+	// uv := NewUvSensor()
+	// // mqtt.DEBUG = log.New(os.Stdout, "", 0)
+	// mqtt.ERROR = log.New(os.Stdout, "", 0)
+	// opts := mqtt.NewClientOptions().AddBroker(MOSQUITTO_HOST).SetClientID("gotrivial")
+	// opts.SetKeepAlive(2 * time.Second)
+	// opts.SetDefaultPublishHandler(f)
+	// opts.SetPingTimeout(1 * time.Second)
 
-	c := mqtt.NewClient(opts)
-	if token := c.Connect(); token.Wait() && token.Error() != nil {
-		panic(token.Error())
-	}
+	// c := mqtt.NewClient(opts)
+	// if token := c.Connect(); token.Wait() && token.Error() != nil {
+	// 	panic(token.Error())
+	// }
 
-	go humidity.forward(c)
-	uv.forward(c)
+	// go humidity.forward(c)
+	// uv.forward(c)
 }

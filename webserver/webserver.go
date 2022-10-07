@@ -3,15 +3,19 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	pkg "github.com/madacluster/huerto/pkg"
 )
+
+const host = "localhost"
 
 // Hudimity
 // GET ${host}/${path}/humidity
 func Hudimity(w http.ResponseWriter, r *http.Request) {
-	sensor := NewHumiditySensor()
+	sensor := pkg.NewHumiditySensor(host)
 
 	// time.Sleep(1000 * time.Millisecond)
-	humidity, temp := sensor.getData()
+	humidity, temp := sensor.GetData()
 	w.Write([]byte(fmt.Sprintf("Humidity: %f\nTemperature: %f", humidity, temp)))
 }
 
@@ -20,8 +24,8 @@ func Hudimity(w http.ResponseWriter, r *http.Request) {
 // Uv
 // GET ${host}/${path}/uv
 func Uv(w http.ResponseWriter, r *http.Request) {
-	sensor := NewUvSensor()
-	uv, risk := sensor.getData()
+	sensor := pkg.NewUvSensor(host)
+	uv, risk := sensor.GetData()
 	w.Write([]byte(fmt.Sprintf("Uv: %f\nRisk: %s", uv, risk)))
 }
 
@@ -30,9 +34,9 @@ func Uv(w http.ResponseWriter, r *http.Request) {
 // Pressure
 // GET ${host}/${path}/pressure
 func Pressure(w http.ResponseWriter, r *http.Request) {
-	sensor := NewPressureSensor()
+	sensor := pkg.NewPressureSensor(host)
 	// time.Sleep(1000 * time.Millisecond)
-	pressure, altitude, temp := sensor.getData()
+	pressure, altitude, temp := sensor.GetData()
 	w.Write([]byte(fmt.Sprintf("Pressure: %f\nAltitude: %f\nTemperature: %f", pressure, altitude, temp)))
 }
 
@@ -41,10 +45,11 @@ func Pressure(w http.ResponseWriter, r *http.Request) {
 // GPIO
 // GET ${host}/${path}/gpio
 func Gpio(w http.ResponseWriter, r *http.Request) {
-	sensor := NewGPIOSensor()
+	sensor := pkg.NewGPIOSensor(host)
 	// time.Sleep(1000 * time.Millisecond)
-	pin, value := sensor.getData()
-	w.Write([]byte(fmt.Sprintf("Pin: %d\nValue: %d", pin, value)))
+	pin, mode, value, values := sensor.GetData()
+
+	w.Write([]byte(fmt.Sprintf("Pin: %d\nMode: %v\nValue: %d\nValues: %d\n", pin, mode, value, values)))
 }
 
 // POST ${host}/${path}/gpio/${pin}/configure
