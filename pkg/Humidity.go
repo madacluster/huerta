@@ -15,6 +15,22 @@ type HumiditySensor struct {
 	*Sensor
 }
 
+func (s *HumiditySensor) SetData(config core.HumidityParams) (float32, float32) {
+	driver := core.DriverConfig{
+		Humidity: &config,
+	}
+	s.basePort(driver)
+	return s.GetData()
+}
+
+func (s *HumiditySensor) Calibrate(temp float32) (float32, float32) {
+	params := core.HumidityParams{
+		CurrentTemperature: temp,
+	}
+	s.SetData(params)
+	return s.GetData()
+}
+
 func NewHumiditySensor(host string) *HumiditySensor {
 	sensor := &HumiditySensor{NewSensor("Humidity", host, 20017)}
 	return sensor

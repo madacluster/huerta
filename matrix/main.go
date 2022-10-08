@@ -30,17 +30,7 @@ func toggleDebug(cmd *cobra.Command, args []string) {
 	}
 }
 func main() {
-	var cmdHumidity = &cobra.Command{
-		Use:   "humidity",
-		Short: "Print humidity",
-		Long:  `print humidity and temperature from sensor`,
-		Args:  cobra.MinimumNArgs(0),
-		Run: func(cmd *cobra.Command, args []string) {
-			sensor := pkg.NewHumiditySensor(ZERO_HOST)
-			humidity, temp := sensor.GetData()
-			fmt.Printf("Humidity: %f\nTemperature: %f\n", humidity, temp)
-		},
-	}
+	var cmdHumidity = Humidity()
 
 	var cmdPressure = &cobra.Command{
 		Use:   "pressure",
@@ -133,7 +123,7 @@ func main() {
 	}
 
 	var rootCmd = &cobra.Command{Use: "matrix"}
-	rootCmd.AddCommand(cmdHumidity, cmdPressure, cmdUV, cmdGPIO, Everloop())
+	rootCmd.AddCommand(cmdHumidity, cmdPressure, cmdUV, cmdGPIO, Everloop(), Everloop())
 	cmdGPIO.AddCommand(cmdReadGPIO, cmdWriteGPIO)
 	rootCmd.PersistentFlags().StringVarP(&ZERO_HOST, "host", "H", "tcp://192.168.0.110", "ZeroMQ host")
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "verbose logging")

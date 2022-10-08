@@ -26,7 +26,7 @@ func Everloop() *cobra.Command {
 	}
 	set := &cobra.Command{
 		Use:    "set [led] [red,blue,green,white]",
-		Short:  "Write Pin GPIO",
+		Short:  "Set LED",
 		Long:   `Write Pin GPIO`,
 		Args:   cobra.MinimumNArgs(2),
 		PreRun: toggleDebug,
@@ -60,7 +60,7 @@ func GetLeds(ls string) []int {
 func GetColor(color string) []int {
 	result := make([]int, 4)
 	leds := strings.Split(color, ",")
-	for i, _ := range result {
+	for i := range result {
 		intL, _ := strconv.Atoi(leds[i])
 		result[i] = intL
 	}
