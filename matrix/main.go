@@ -30,7 +30,6 @@ func toggleDebug(cmd *cobra.Command, args []string) {
 	}
 }
 func main() {
-	var echoTimes int
 	var cmdHumidity = &cobra.Command{
 		Use:   "humidity",
 		Short: "Print humidity",
@@ -133,10 +132,8 @@ func main() {
 		},
 	}
 
-	cmdUV.Flags().IntVarP(&echoTimes, "times", "t", 1, "times to echo the input")
-
 	var rootCmd = &cobra.Command{Use: "matrix"}
-	rootCmd.AddCommand(cmdHumidity, cmdPressure, cmdUV, cmdGPIO)
+	rootCmd.AddCommand(cmdHumidity, cmdPressure, cmdUV, cmdGPIO, Everloop())
 	cmdGPIO.AddCommand(cmdReadGPIO, cmdWriteGPIO)
 	rootCmd.PersistentFlags().StringVarP(&ZERO_HOST, "host", "H", "tcp://192.168.0.110", "ZeroMQ host")
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "verbose logging")

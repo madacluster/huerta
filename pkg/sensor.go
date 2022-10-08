@@ -47,7 +47,7 @@ func NewSensor(name, host string, port int) *Sensor {
 }
 
 // BASE PORT \\ (port where configurations are sent)
-func (s *GPIOSensor) basePort(config core.DriverConfig) {
+func (s *Sensor) basePort(config core.DriverConfig) {
 	// Connect ZMQ Socket To MATRIX CORE
 	// zmq.PUSH
 	pusher, _ := zmq.NewSocket(zmq.PUSH)      // Create A Pusher Socket
@@ -102,7 +102,7 @@ func (s *Sensor) errorPort(channel chan string) {
 
 func (s *Sensor) dataUpdatePort() (string, error) {
 	// Connect ZMQ Socket To MATRIX CORE
-
+	log.Debug("config")
 	subscriber, _ := zmq.NewSocket(zmq.SUB)       // Create A Subscriber Socket
 	subscriber.Connect(s.getHost(s.ports.update)) // Connect Subscriber To Data Update Port
 	subscriber.SetSubscribe("")                   // Subscribe To Data Update Port Messages
